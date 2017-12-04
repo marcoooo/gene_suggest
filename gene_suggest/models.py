@@ -5,7 +5,7 @@ from django.db import models
 
 
 # Create your models here.
-class GeneAutocomplete(models.Model):
+class GeneDataBank(models.Model):
     class Meta:
         managed = False
         db_table = 'gene_autocomplete'
