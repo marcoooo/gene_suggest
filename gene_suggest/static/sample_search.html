@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sample Gene Search exemple</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.css">
+</head>
+<body ng-app="GeneSuggest" ng-cloak>
+<md-toolbar md-scroll-shrink>
+    <div class="md-toolbar-tools">
+        <h3>
+            <span>EBI Gene Search</span>
+        </h3>
+    </div>
+</md-toolbar>
+<div ng-controller="GeneController as ctrl" layout="column">
+    <md-content class="md-padding">
+        <form ng-submit="$event.preventDefault()">
+            <md-autocomplete
+                    ng-disabled="false"
+                    md-no-cache="true"
+                    md-selected-item="ctrl.selectedItem"
+                    md-search-text="ctrl.searchText"
+                    md-selected-item-change="ctrl.selectedItemChange(gene)"
+                    md-items="gene in ctrl.querySearch(ctrl.searchText)"
+                    md-item-text="gene.display_label"
+                    md-min-length="3"
+                    placeholder="Please type in the gene name">
+                <md-item-template>
+                    <span md-highlight-text="ctrl.searchText" md-highlight-flags="^i">{{ gene.display_label }}</span>
+                </md-item-template>
+                <md-not-found>
+                    No gene matching "{{ ctrl.searchText }}" were found.
+                </md-not-found>
+            </md-autocomplete>
+            <br/>
+        </form>
+    </md-content>
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.5/angular.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.5/angular-animate.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.5/angular-aria.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.5/angular-messages.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.js"></script>
+<!-- Your application bootstrap  -->
+<script type="text/javascript">
+
+    /**
+     * You must include the dependency on 'ngMaterial'
+     */
+    (function () {
+        'use strict';
+        var app = angular.module('GeneSuggest', ['ngMaterial']);
+        app.config(function ($mdThemingProvider) {
+            $mdThemingProvider.theme('default')
+                .primaryPalette('purple')
+                .accentPalette('indigo');
+        });
+        app.controller('GeneController', function ($mdToast, $http) {
+            console.log("loaded");
+            var self = this;
+            self.querySearch = function (query) {
+                return $http.get("/api/gene_suggest/", {params: {query: query, limit: 50}})
+                    .then(function (response) {
+                        //console.log(response.data);
+                        return response.data;
+                    })
+                return {};
+            };
+            self.selectedItemChange = function(gene) {
+                $mdToast.show(
+                    $mdToast.simple()
+                        .textContent('Item changed to ' + gene.display_label)
+                        .position('top right')
+                        .hideDelay(3000)
+                );
+
+            }
+
+        });
+
+        app.controller('SpeciesController', function ($scope) {
+            $scope.loadMore = function () {
+                console.log('loading more');
+            }
+        });
+
+        app.directive('lazyLoad', function () {
+            return {
+                restrict: 'A',
+                link: function (scope, elem) {
+                    var scroller = elem[0]
+                    $(scroller).bind('scroll', function () {
+                        if (scroller.scrollTop + scroller.offsetHeight >= scroller.scrollHeight) {
+                            scope.$apply('loadMore()')
+                        }
+                    })
+                }
+            }
+        });
+    })()
+
+</script>
+</body>
+</html>
