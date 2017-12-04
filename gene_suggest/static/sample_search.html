@@ -16,26 +16,34 @@
 </md-toolbar>
 <div ng-controller="GeneController as ctrl" layout="column">
     <md-content class="md-padding">
-        <form ng-submit="$event.preventDefault()">
-            <md-autocomplete
-                    ng-disabled="false"
-                    md-no-cache="true"
-                    md-selected-item="ctrl.selectedItem"
-                    md-search-text="ctrl.searchText"
-                    md-selected-item-change="ctrl.selectedItemChange(gene)"
-                    md-items="gene in ctrl.querySearch(ctrl.searchText)"
-                    md-item-text="gene.display_label"
-                    md-min-length="3"
-                    placeholder="Please type in the gene name">
-                <md-item-template>
-                    <span md-highlight-text="ctrl.searchText" md-highlight-flags="^i">{{ gene.display_label }}</span>
-                </md-item-template>
-                <md-not-found>
-                    No gene matching "{{ ctrl.searchText }}" were found.
-                </md-not-found>
-            </md-autocomplete>
-            <br/>
-        </form>
+        <div layout="column">
+            <div layout="row" layout-align="space-between center">
+                <md-autocomplete flex="70"
+                                 ng-disabled=false
+                                 md-no-cache=true
+                                 md-selected-item="ctrl.selectedItem"
+                                 md-search-text="ctrl.searchText"
+                                 md-selected-item-change="ctrl.selectedItemChange(gene)"
+                                 md-items="gene in ctrl.querySearch(ctrl.searchText)"
+                                 md-item-text="gene.display_label"
+                                 md-min-length="3"
+                                 placeholder="Please type in the gene name">
+                    <md-item-template>
+                            <span md-highlight-text="ctrl.searchText"
+                                  md-highlight-flags="^i">{{ gene.display_label }}</span>
+                    </md-item-template>
+                    <md-not-found>
+                        No gene matching "{{ ctrl.searchText }}" were found.
+                    </md-not-found>
+                </md-autocomplete>
+                <md-input-container flex="30" style="padding-left: 10px;">
+                    <label>Limit results</label>
+                    <md-select ng-model="searchLimit">
+                        <md-option ng-repeat="limit in searchLimits" value="{{ limit }}">{{ limit }}</md-option>
+                    </md-select>
+                </md-input-container>
+            </div>
+        </div>
     </md-content>
 </div>
 
@@ -58,18 +66,19 @@
                 .primaryPalette('purple')
                 .accentPalette('indigo');
         });
-        app.controller('GeneController', function ($mdToast, $http) {
+        app.controller('GeneController', function ($scope, $mdToast, $http) {
+            $scope.searchLimits = [10, 20, 50, 100];
             console.log("loaded");
             var self = this;
             self.querySearch = function (query) {
-                return $http.get("/api/gene_suggest/", {params: {query: query, limit: 50}})
+                return $http.get("/api/gene_suggest/", {params: {query: query, limit: $scope.searchLimit}})
                     .then(function (response) {
                         //console.log(response.data);
                         return response.data;
                     })
                 return {};
             };
-            self.selectedItemChange = function(gene) {
+            self.selectedItemChange = function (gene) {
                 $mdToast.show(
                     $mdToast.simple()
                         .textContent('Item changed to ' + gene.display_label)

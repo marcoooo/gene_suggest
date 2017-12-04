@@ -25,3 +25,21 @@ class EbiGeneSuggestListView(generics.ListAPIView):
             return queryset[0:self.request.query_params.get('limit', 10)]
         else:
             return GeneDataBank.objects.none()
+
+
+class EbiSpeciesSuggestListView(generics.ListAPIView):
+    queryset = None
+    serializer_class = EbiSpeciesSuggestSerializer
+
+    def get_queryset(self):
+        """
+        Filtering results according to request parameters,
+        no paramters, empty list
+        :return:
+        """
+        query = self.request.query_params.get('query', None)
+        if query is not None and len(query) >= 2:
+            queryset = GeneDataBank.objects.filter(species__startswith=query).values('species').distinct().order_by('species')
+            return queryset[0:self.request.query_params.get('limit', 10)]
+        else:
+            return GeneDataBank.objects.none()
