@@ -1,8 +1,8 @@
-# EBI Technical Test
+# EBI Gene suggestion 
 
-A Technical test implementation.
+A Technical test implementation to help search from ensembl gene suggest database
 
-Supposed to help searching through Ensembl Gene DB and provide REST-simple gene search api
+Help searching through Ensembl Gene DB and provide REST-simple gene search api
 
 
 ## License
