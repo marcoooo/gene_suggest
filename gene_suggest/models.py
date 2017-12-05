@@ -14,4 +14,4 @@ class GeneDataBank(models.Model):
     stable_id = models.CharField(max_length=128, primary_key=True)
     display_label = models.CharField(max_length=128, blank=True, null=True)
     location = models.CharField(max_length=60, blank=True, null=True)
-    db = models.CharField(max_length=32)
+    source_db = models.CharField(max_length=32, db_column='db')

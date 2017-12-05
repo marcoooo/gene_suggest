@@ -43,6 +43,16 @@
                     </md-select>
                 </md-input-container>
             </div>
+            <md-list flex ng-if="genes.length > 0" style="border: 1px solid lightgray">
+                <md-subheader>Corresponding species</md-subheader>
+                <md-list-item class="md-3-line" ng-repeat="item in genes" ng-click="null">
+                    <div class="md-list-item-text" layout="column">
+                        <h3>Species: {{ item.species }} -- from {{ item.source_db }} --</h3>
+                        <h4>Stable Id: {{ item.stable_id }}</h4>
+                        <p>Location: {{ item.location }}</p>
+                    </div>
+                </md-list-item>
+            </md-list>
         </div>
     </md-content>
 </div>
@@ -66,29 +76,40 @@
                 .primaryPalette('purple')
                 .accentPalette('indigo');
         });
-        app.controller('GeneController', function ($scope, $mdToast, $http) {
-            $scope.searchLimits = [10, 20, 50, 100];
-            console.log("loaded");
-            var self = this;
-            self.querySearch = function (query) {
-                return $http.get("/api/gene_suggest/", {params: {query: query, limit: $scope.searchLimit}})
-                    .then(function (response) {
-                        //console.log(response.data);
-                        return response.data;
-                    })
-                return {};
-            };
-            self.selectedItemChange = function (gene) {
-                $mdToast.show(
-                    $mdToast.simple()
-                        .textContent('Item changed to ' + gene.display_label)
-                        .position('top right')
-                        .hideDelay(3000)
-                );
+        app.controller('GeneController', function ($scope, $mdToast, $http, $q) {
+                $scope.searchLimits = [10, 20, 50, 100];
+                $scope.searchLimit = 10;
+                //$scope.listGenes = [];
+                var self = this;
+                self.querySearch = function (query) {
+                    return $http.get("/api/gene_suggest/", {params: {query: query, limit: $scope.searchLimit}})
+                        .then(function (response) {
+                            //console.log(response.data);
+                            return response.data;
+                        })
+                };
+                self.listGenes = function (gene) {
+                    if (gene != null)
+                        return $http.get("/api/gene_list/", {params: {gene: gene.display_label, limit: $scope.searchLimit}})
+                            .then(function (response) {
+                                $scope.genes = response.data
+                                return response.data.items;
+                            })
+                };
+                self.selectedItemChange = function (gene) {
+                    if (gene != null) {
+                        $mdToast.show(
+                            $mdToast.simple()
+                                .textContent('Item changed to ' + gene.display_label)
+                                .position('top right')
+                                .hideDelay(3000)
+                        );
+                        self.listGenes(gene);
+                    }
+                };
 
             }
-
-        });
+        );
 
         app.controller('SpeciesController', function ($scope) {
             $scope.loadMore = function () {

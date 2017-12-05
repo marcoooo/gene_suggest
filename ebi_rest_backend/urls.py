@@ -14,8 +14,10 @@ Including another URLconf
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
 from django.conf.urls import url, include
+from django.http import HttpResponseRedirect
 import gene_suggest.api.urls
 
 urlpatterns = [
+    url(r'^$', lambda r: HttpResponseRedirect('/static/sample_search.html')),
     url(r'^api/', include(gene_suggest.api.urls))
 ]
