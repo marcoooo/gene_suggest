@@ -22,7 +22,6 @@ class EbiGeneSuggestListView(generics.ListAPIView):
             queryset = GeneDataBank.objects.filter(display_label__startswith=query)
             species = self.request.query_params.get('species', None)
             if species is not None:
-                print "filter more by species"
                 queryset.filter(species=species)
             return queryset.values('display_label').distinct()[0:self.request.query_params.get('limit', 10)]
         else:
