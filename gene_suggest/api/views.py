@@ -18,11 +18,11 @@ class EbiGeneSuggestListView(generics.ListAPIView):
         :return:
         """
         query = self.request.query_params.get('query', None)
-        if query is not None and len(query) >= 2:
+        if query:
             queryset = GeneDataBank.objects.filter(display_label__startswith=query)
             species = self.request.query_params.get('species', None)
-            if species is not None:
-                queryset.filter(species=species)
+            if species:
+                queryset = GeneDataBank.objects.filter(display_label__startswith=query, species=species)
             return queryset.values('display_label').distinct()[0:self.request.query_params.get('limit', 10)]
         else:
             return GeneDataBank.objects.none()
@@ -34,12 +34,11 @@ class EbiOtherSpeciesListView(generics.ListAPIView):
 
     def get_queryset(self):
         filter_gene = self.request.query_params.get('gene', None)
-        if filter_gene is not None:
+        if filter_gene:
             queryset = GeneDataBank.objects.filter(display_label=filter_gene)
             return queryset[0:self.request.query_params.get('limit', 100)]
         else:
             return GeneDataBank.objects.none()
-        return super(EbiOtherSpeciesListView, self).get_queryset()
 
 
 class EbiSpeciesListView(generics.ListAPIView):
